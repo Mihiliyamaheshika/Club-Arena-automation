@@ -107,7 +107,7 @@ test.describe('Global Admin Flow', () => {
         await page.getByRole('row', { name: 'Slysa 1 SLYSA' }).getByRole('button').nth(1).click();
         // await page.getByRole('button', { name: 'End tour' }).click();
         // await page.getByRole('button', { name: 'Don\'t show again' }).click();
-        await page.getByText('Saturday, Sep').click();
+      
         await page.locator('td:nth-child(6) > .calendar-table-cell-day-booking-wrapper').click();
         await page.locator('.field-part-group-content').first().click();
         await page.getByRole('textbox', { name: 'Start', exact: true }).click();
