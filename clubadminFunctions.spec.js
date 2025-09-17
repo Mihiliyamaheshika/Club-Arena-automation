@@ -24,12 +24,13 @@ async function login(page, email, password) {
     }
 }
 
-test.describe('Club Admin Flow', () => {
+test.describe.serial('Club Admin Flow', () => {
     const email = 'mihiliyamaheshika@gmail.com';
     const password = 'Mm1234';
 
     test('2 - Create new field', async ({ page }) => {
         await login(page, email, password);
+        
         await page.click("//a[@title='Fields']");
         await expect(page).toHaveURL("https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/fields");
 
@@ -44,20 +45,20 @@ test.describe('Club Admin Flow', () => {
 
     test('3 - Allocate a field', async ({ page }) => {
         await login(page, email, password);
-    
-         await page.locator("//mat-icon[normalize-space()='arrow_drop_down']").click();
 
-        //Accessing to Slamsa field
-        const slamsaOption = page.locator("//mat-option//div[normalize-space()='SLYSA']");
-        await slamsaOption.waitFor({ state: 'visible' });
-        await slamsaOption.click();
+        await page.locator("//mat-icon[normalize-space()='arrow_drop_down']").click();
+
+        //Accessing to Slaysa field
+        const slysaOption = page.locator("//mat-option//div[normalize-space()='Slysa']");
+        await slysaOption.waitFor({ state: 'visible' });
+        await slysaOption.click();
 
         await page.locator("//a[@title='Fields']").click();
         await expect(page).toHaveURL('https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/fields');
 
         //await page.getByRole('button', { name: 'End tour' }).click();
         // await page.getByRole('button', { name: 'Don\'t show again' }).click();
-        await page.getByRole('row', { name: 'Slysa 1 SLYSA' }).getByRole('button').nth(1).click();
+        await page.getByRole('row', { name: 'Slysa 2 SLYSA' }).getByRole('button').nth(1).click();
         // await page.getByRole('button', { name: 'End tour' }).click();
         // await page.getByRole('button', { name: 'Don\'t show again' }).click();
 
@@ -106,7 +107,7 @@ test.describe('Club Admin Flow', () => {
 
         await page.getByRole('radio', { name: 'Girls' }).check();
         await page.getByRole('spinbutton', { name: 'Birth year' }).fill('2012');
-        await page.pause();
+        // await page.pause();
         await page.locator('#mat-select-4 svg').click();
         await page.getByRole('listbox', { name: 'Hours' }).click();
         await page.locator('#mat-select-6').click();
@@ -135,17 +136,17 @@ test.describe('Club Admin Flow', () => {
     test('6 - Booking flow', async ({ page }) => {
         await login(page, email, password);
 
-          await page.locator("//mat-icon[normalize-space()='arrow_drop_down']").click();
+        await page.locator("//mat-icon[normalize-space()='arrow_drop_down']").click();
 
-        //Accessing to Slamsa field
-        const slamsaOption = page.locator("//mat-option//div[normalize-space()='SLYSA']");
-        await slamsaOption.waitFor({ state: 'visible' });
-        await slamsaOption.click();
+        //Accessing to Slaysa field
+        const slysaOption = page.locator("//mat-option//div[normalize-space()='Slysa']");
+        await slysaOption.waitFor({ state: 'visible' });
+        await slysaOption.click();
 
         await expect(page).toHaveURL('https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/fields');
         //Access to a field 
-        await page.click("//mat-cell[normalize-space()='New test field']");
-        await expect(page).toHaveURL('https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/club/slysa/field/new-test-field');
+        await page.click("//mat-cell[normalize-space()='Slysa 2']");
+        await expect(page).toHaveURL('https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/club/slysa/field/slysa-2');
         const isVisible = await page.isVisible("//span[@class='title-content ng-star-inserted']");
         console.log('Is element visible:', isVisible);
 
@@ -155,11 +156,26 @@ test.describe('Club Admin Flow', () => {
         await startCell.waitFor({ state: 'visible' });
         await startCell.dragTo(endCell);
 
-        await page.getByRole('textbox', { name: 'Finish time' }).click();
-        await page.getByRole('button', { name: '10' }).click();
+        const fieldPartHeading = page.getByRole('heading', { name: '-2' }).first();
+        await expect(fieldPartHeading).toBeVisible();
+        await expect(fieldPartHeading).toBeEnabled();
+
+        //  normal click first
+        try {
+            await fieldPartHeading.click({ timeout: 5000 });
+        } catch (e) {
+            // If still not clickable in headless mode, fallback to force click
+            await fieldPartHeading.click({ force: true });
+        }
+
+        await page.getByRole('textbox', { name: 'Start time' }).click();
+        await page.getByRole('button', { name: '12', exact: true }).click();
         await page.getByRole('button', { name: 'Ok', exact: true }).click();
-        await page.getByRole('dialog', { name: 'Book field - New test field' }).click();
-        await page.getByRole('textbox', { name: 'Title' }).fill('test  1');
+        await page.getByRole('textbox', { name: 'Finish time' }).click();
+        await page.getByRole('button', { name: '6' }).click();
+        await page.getByRole('button', { name: 'Ok', exact: true }).click();
+        await page.getByRole('dialog', { name: 'Book field - Slysa 2' }).click();
+        await page.getByRole('textbox', { name: 'Title' }).fill('Automation test');
         await page.getByRole('switch', { name: 'Match' }).click();
         await page.getByRole('button', { name: 'Book field' }).click();
 
@@ -171,9 +187,16 @@ test.describe('Club Admin Flow', () => {
         await page.locator("//mat-icon[normalize-space()='arrow_drop_down']").click();
 
         //Accessing to Slamsa field
-        const slamsaOption = page.locator("//mat-option//div[normalize-space()='Slamsa']");
-        await slamsaOption.waitFor({ state: 'visible' });
+        // Accessing the "Slamsa" field
+        const slamsaOption = page.locator("//div[@class='area-area-name ng-star-inserted'][normalize-space()='Slamsa']");
+
+        // Wait until it's visible and enabled
+        await expect(slamsaOption).toBeVisible();
+        await expect(slamsaOption).toBeEnabled();
+
+        // Click the option
         await slamsaOption.click();
+
 
         await page.locator("//a[@title='Import']").click();
         await expect(page).toHaveURL('https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/import');
@@ -230,7 +253,7 @@ test.describe('Club Admin Flow', () => {
 
         await page.getByRole('combobox', { name: 'Country Norway' }).locator('svg').click();
         await page.getByText('Sri Lanka').click();
-        await page.locator('mat-card').filter({ hasText: 'Most popular Pay as you go 0' }).click();
+        await page.locator('form mat-card').filter({ hasText: 'Pay as you go 0 NOK (0 USD' }).click();
         await page.getByRole('textbox', { name: 'Email' }).click();
         await page.getByRole('textbox', { name: 'Email' }).fill('mihi@gmail.com');
         await page.getByRole('checkbox', { name: 'I wish to receive information' }).check();
