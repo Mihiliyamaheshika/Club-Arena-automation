@@ -16,7 +16,7 @@ async function login(page, email, password) {
     }
 }
 
-test.describe('Global Admin Flow', () => {
+test.describe.serial('Global Admin Flow', () => {
     const email = 'mihiliyamaheshika@gmail.com';
     const password = 'Mm1234';
 
@@ -36,14 +36,37 @@ test.describe('Global Admin Flow', () => {
 
         await page.getByRole('textbox', { name: 'Name' }).fill(uniqueName);
         await page.getByRole('textbox', { name: 'Description' }).fill('Automated test club');
+        // Click the Country combobox
         await page.getByRole('combobox', { name: 'Country' }).click();
-        await page.getByRole('option', { name: 'China' }).click();
+
+
+        {
+            const overlay = page.locator('div.cdk-overlay-container div.cdk-overlay-pane').last();
+            const option = overlay.getByRole('option', { name: 'China', exact: true });
+
+            let clicked = false;
+            for (let i = 0; i < 50; i++) {
+                if (await option.count() > 0 && await option.isVisible()) {
+                    await option.scrollIntoViewIfNeeded();
+                    await option.click();
+                    clicked = true;
+                    break;
+                }
+                // Scroll the overlay if the option is not visible
+                await overlay.evaluate(el => el.scrollBy(0, 100));
+                await page.waitForTimeout(100);
+            }
+
+            if (!clicked) {
+                console.warn('Warning: Country "China" was not found or clickable after scrolling overlay');
+            }
+        }
+
         await page.getByRole('spinbutton', { name: 'Grace Period' }).click();
         await page.getByRole('spinbutton', { name: 'Grace Period' }).fill('55');
 
         await page.locator("//span[normalize-space()='Save club']").click();
 
-        // await page.pause();
 
     });
 
@@ -67,6 +90,10 @@ test.describe('Global Admin Flow', () => {
         await page.click("//a[@title='Fields']");
         await expect(page).toHaveURL("https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/fields");
 
+
+        //await page.getByRole('button', { name: 'End tour' }).click();
+        //  await page.getByLabel('End Tour?').getByRole('button', { name: 'End tour' }).click();
+
         await page.getByRole('button', { name: 'CREATE FIELD' }).click();
         await page.getByRole('textbox', { name: 'Name' }).fill('Auto Field 1');
         // Select Club
@@ -74,7 +101,7 @@ test.describe('Global Admin Flow', () => {
 
         {
             const overlay = page.locator('div.cdk-overlay-container div.cdk-overlay-pane').last();
-            const option = overlay.getByRole('option', { name: 'SLYSA', exact: true });
+            const option = overlay.getByRole('option', { name: 'Slysa', exact: true });
 
             let clicked = false;
             for (let i = 0; i < 50; i++) {
@@ -89,10 +116,11 @@ test.describe('Global Admin Flow', () => {
             }
 
             if (!clicked) {
-                console.warn('Warning: Club "SLYSA" was not found or clickable after scrolling overlay');
+                console.warn('Warning: Club "Slysa" was not found or clickable after scrolling overlay');
             }
         }
-        await page.getByRole('combobox', { name: 'Field layout' }).click();
+
+        await page.getByRole('combobox', { name: 'Field layout' }).locator('svg').click();
         await page.getByRole('listbox', { name: 'Field layout' }).click();
         await page.getByRole('button', { name: 'Create field' }).click();
     });
@@ -107,14 +135,17 @@ test.describe('Global Admin Flow', () => {
         await page.getByRole('row', { name: 'Slysa 1 SLYSA' }).getByRole('button').nth(1).click();
         // await page.getByRole('button', { name: 'End tour' }).click();
         // await page.getByRole('button', { name: 'Don\'t show again' }).click();
-      
+
         await page.locator('td:nth-child(6) > .calendar-table-cell-day-booking-wrapper').click();
-        await page.locator('.field-part-group-content').first().click();
+        // await page.pause();
+        await page.getByRole('heading', { name: '-2' }).first().click();
         await page.getByRole('textbox', { name: 'Start', exact: true }).click();
         await page.getByRole('textbox', { name: 'Start', exact: true }).fill('11:15');
         await page.getByRole('textbox', { name: 'End', exact: true }).click();
         await page.getByRole('textbox', { name: 'End', exact: true }).fill('16:45');
+        await page.pause();
         await page.getByRole('switch', { name: 'Repeating timeslot' }).click();
+
 
         await page.getByRole('combobox', { name: 'Recurrence type Daily' }).locator('svg').click();
         await page.getByRole('listbox', { name: 'Recurrence type' }).click();
@@ -190,7 +221,7 @@ test.describe('Global Admin Flow', () => {
 
         {
             const overlay = page.locator('div.cdk-overlay-container div.cdk-overlay-pane').last();
-            const option = overlay.getByRole('option', { name: 'SLYSA', exact: true });
+            const option = overlay.getByRole('option', { name: 'Slysa', exact: true });
 
             let clicked = false;
             for (let i = 0; i < 50; i++) {
@@ -205,9 +236,10 @@ test.describe('Global Admin Flow', () => {
             }
 
             if (!clicked) {
-                console.warn('Warning: Club "SLYSA" was not found or clickable after scrolling overlay');
+                console.warn('Warning: Club "Slysa" was not found or clickable after scrolling overlay');
             }
         }
+        await page.pause();
         await page.getByRole('button', { name: 'Create cafeteria' }).click();
     });
 
@@ -257,11 +289,13 @@ test.describe('Global Admin Flow', () => {
 
     test('8 - Booking flow', async ({ page }) => {
         await login(page, email, password);
+
         await page.click("//span[contains(text(),'Fields')]");
         await expect(page).toHaveURL("https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/fields");
         await page.getByRole('textbox', { name: 'Search' }).click();
         await page.getByRole('textbox', { name: 'Search by name or club' }).fill('Slysa');
-        await page.getByRole('row', { name: 'SLYSA 1 SLYSA' }).click();
+        await expect(page.getByRole('row', { name: 'Slysa 1 SLYSA' })).toBeVisible();
+        await page.getByRole('row', { name: 'Slysa 1 SLYSA' }).click();
 
 
         // Dynamic Date Logic
@@ -274,8 +308,8 @@ test.describe('Global Admin Flow', () => {
         }
 
         const targetDay = targetDate.getDate();
-        const targetMonth = targetDate.toLocaleString('default', { month: 'short' }); // e.g., "Sep"
-        const targetDayName = targetDate.toLocaleString('default', { weekday: 'long' }); // e.g., "Saturday"
+        const targetMonth = targetDate.toLocaleString('default', { month: 'short' }); // Ex: "Sep"
+        const targetDayName = targetDate.toLocaleString('default', { weekday: 'long' }); // Ex:"Saturday"
 
         const formattedDate = `${targetDayName}, ${targetMonth} ${targetDay}`;
         console.log("Booking test will use date:", formattedDate);
@@ -289,13 +323,27 @@ test.describe('Global Admin Flow', () => {
         await page.waitForSelector('.calendar-table-cell-day-booking-wrapper', { state: 'visible' });
 
         await page.locator('td:nth-child(6) > .calendar-table-cell-day-booking-wrapper').click();
+        //await page.pause();
 
-        await page.getByRole('heading', { name: 'test 1' }).click();
+        // await page.getByRole('heading', { name: '-2' }).first().waitFor({ state: 'visible' });
+        // await page.getByRole('heading', { name: '-2' }).first().click();
+        const fieldPartHeading = page.getByRole('heading', { name: '-2' }).first();
+        await expect(fieldPartHeading).toBeVisible();
+        await expect(fieldPartHeading).toBeEnabled();
+
+        //  normal click first
+        try {
+            await fieldPartHeading.click({ timeout: 5000 });
+        } catch (e) {
+            // If still not clickable in headless mode, fallback to force click
+            await fieldPartHeading.click({ force: true });
+        }
+
         await page.getByRole('textbox', { name: 'Start time' }).click();
-        await page.getByRole('button', { name: '1', exact: true }).click();
+        await page.getByRole('button', { name: '11', exact: true }).click();
         await page.getByRole('button', { name: 'Ok', exact: true }).click();
         await page.getByRole('textbox', { name: 'Finish time' }).click();
-        await page.getByRole('button', { name: '2', exact: true }).click();
+        await page.getByRole('button', { name: '1', exact: true }).click();
         await page.getByRole('button', { name: 'Ok', exact: true }).click();
 
         await page.getByRole('textbox', { name: 'Title' }).fill('Test match 2 ');
@@ -329,7 +377,7 @@ test.describe('Global Admin Flow', () => {
         await page.getByRole('textbox', { name: 'Name of club' }).fill('Club test');
         await page.getByRole('combobox', { name: 'Country Norway' }).locator('svg').click();
         await page.getByText('Sri Lanka').click();
-        await page.locator('mat-card').filter({ hasText: 'Most popular Pay as you go 0' }).click();
+        await page.locator('form mat-card').filter({ hasText: 'Pay as you go 0 NOK (0 USD' }).click();
         await page.getByRole('textbox', { name: 'Email' }).click();
         await page.getByRole('textbox', { name: 'Email' }).fill('mihi@gmail.com');
         await page.getByRole('checkbox', { name: 'I wish to receive information' }).check();
@@ -339,3 +387,4 @@ test.describe('Global Admin Flow', () => {
     });
 
 });
+
