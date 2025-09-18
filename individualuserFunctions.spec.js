@@ -8,11 +8,12 @@ async function login(page, email, password) {
     await page.getByRole('textbox', { name: 'Password' }).fill(password);
     await page.getByRole('button', { name: 'Log in' }).click();
     await expect(page).toHaveURL("https://club-arena-test2-bhancvd6ghf9dwd7.westeurope-01.azurewebsites.net/bookings");
-
-    //  Switch to Team Manager 
-    //   await page.click('//*[@id="mat-select-value-3"]/span/mat-select-trigger/div');
-    //   await page.waitForSelector("//div[@class='area-role-name'][normalize-space()='Team manager']");
-    //   await page.click("//div[@class='area-role-name'][normalize-space()='Team manager']");
+    
+  // Switch to Individual User 
+//   await page.click('//*[@id="mat-select-value-3"]/span/mat-select-trigger/div');
+//   await page.waitForSelector("//mat-option[@id='mat-option-12']");
+//   await page.click("//mat-option[@id='mat-option-12']");
+//   console.log('User role switched to individual user successfully.');
 
     // Dismiss cookie banner if it appears
     const cookieAccept = page.getByRole('button', { name: 'Accept' });
